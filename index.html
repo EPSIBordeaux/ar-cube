@@ -35,6 +35,45 @@
 		initialize();
 		animate();
 
+		// https://codepen.io/HelloPopartz/pen/EZOPEq
+		function drawSquare(x1, y1, x2, y2) {
+			var square = new THREE.Geometry();
+			square.vertices.push(new THREE.Vector3(x1, y1, 0));
+			square.vertices.push(new THREE.Vector3(x1, y2, 0));
+			square.vertices.push(new THREE.Vector3(x2, y1, 0));
+			square.vertices.push(new THREE.Vector3(x2, y2, 0));
+
+			square.faces.push(new THREE.Face3(0, 1, 2));
+			square.faces.push(new THREE.Face3(1, 2, 3));
+			return square;
+		}
+
+		function placeSquare(square_mesh, relativeX, relativeY, relativeZ) {
+			if (relativeX != undefined) {
+				square_mesh.position.x = square_mesh.position.x + relativeX;
+			}
+
+			if (relativeY != undefined) {
+				square_mesh.position.y = square_mesh.position.y + relativeY;
+			}
+
+			if (relativeZ != undefined) {
+				square_mesh.position.z = square_mesh.position.z + relativeZ;
+			}
+			return square_mesh;
+		}
+
+		function createAndPlaceSquare(material, relativeX, relativeY, relativeZ) {
+			var geometry = drawSquare(0.5, 0.5, 1.5, 1.5);
+			relativeX = relativeX || undefined;
+			relativeY = relativeY || undefined;
+			relativeZ = relativeZ || undefined;
+
+			var square_mesh = new THREE.Mesh(geometry, material);
+			square_mesh.rotation.x = Math.PI / 2;
+			return placeSquare(square_mesh, relativeX, relativeY, relativeZ);
+		}
+
 		function initialize() {
 			scene = new THREE.Scene();
 
@@ -48,7 +87,7 @@
 				antialias: true,
 				alpha: true
 			});
-			
+
 			renderer.setClearColor(new THREE.Color('lightgrey'), 0)
 			renderer.setSize(640, 480);
 			renderer.domElement.style.position = 'absolute'
@@ -122,8 +161,29 @@
 			mesh1.position.y = 0.5;
 
 			markerRoot1.add(mesh1);
-		}
 
+			// MATERIALS 
+			var material_color_orange = new THREE.MeshBasicMaterial({ color: 0xF6831E, side: THREE.DoubleSide });
+			var material_color_cyan = new THREE.MeshBasicMaterial({ color: 0x435354, side: THREE.DoubleSide });
+			var material_color_lightOrange = new THREE.MeshBasicMaterial({ color: 0xffce0c, side: THREE.DoubleSide });
+			var material_color_red = new THREE.MeshBasicMaterial({ color: 0xff400c, side: THREE.DoubleSide });
+			var material_color_violet = new THREE.MeshBasicMaterial({ color: 0xda0cff, side: THREE.DoubleSide });
+
+			var square_bas_mesh = createAndPlaceSquare(material_color_orange, -1, undefined, undefined);
+			markerRoot1.add(square_bas_mesh);
+
+			var square_haut1_mesh = createAndPlaceSquare(material_color_cyan, -1, undefined, -2);
+			markerRoot1.add(square_haut1_mesh);
+
+			var square_haut2_mesh = createAndPlaceSquare(material_color_lightOrange, -1, undefined, -3);
+			markerRoot1.add(square_haut2_mesh);
+
+			var square_gauche_mesh = createAndPlaceSquare(material_color_red, -2, undefined, -1);
+			markerRoot1.add(square_gauche_mesh);
+
+			var square_droite_mesh = createAndPlaceSquare(material_color_violet, undefined, undefined, -1);
+			markerRoot1.add(square_droite_mesh);
+		}
 
 		function update() {
 			// update artoolkit on every frame
