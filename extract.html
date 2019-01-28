@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<style>
+		body {
+			margin: 0px;
+			padding: 0px;
+		}
+	</style>
+</head>
+
+<body>
+
+	<canvas id="lol" width="500" height="500"></canvas>
+	<canvas id="myCanvas" width="1000" height="750"></canvas>
+	<script>
+		function getSquarePoints(points) {
+			var leftToRight = points.sort( (a,b) => a.x > b.x);
+			var lefts =  leftToRight.slice(0, 2);
+			var right = leftToRight.slice(2, 4);
+			
+			var leftTopToBottom = lefts.sort( (a,b) => a.y > b.y);
+			var rightTopToBottom = right.sort( (a,b) => a.y > b.y);
+
+			return {
+				leftTop: leftTopToBottom[0],
+				rightTop: rightTopToBottom[0],
+				leftBottom: leftTopToBottom[1],
+				rightBottom: rightTopToBottom[1]
+			}
+		}
+
+		function crop(p1, p2, p3, p4, ctx){
+			var canvasss = document.getElementById('lol');
+			var context = canvasss.getContext('2d');
+
+			var points = getSquarePoints([p1,p2,p3,p4]);
+
+			console.log(points);
+
+			var image = new Image();
+			image.onload = function(){
+				context.drawImage(image,
+					points.leftTop.x, points.leftTop.y,   // Start at 70/20 pixels from the left and the top of the image (crop),
+			
+					points.rightTop.x - points.leftTop.x, 
+					points.rightBottom.x - points.leftBottom.x,   // "Get" a `50 * 50` (w * h) area from the source image (crop),
+					0, 0,     // Place the result at 0, 0 in the canvas,
+					200, 200); // With as width / height: 100 * 100 (scale)
+			}
+
+			image.src = canvas.toDataURL();
+			document.body.appendChild(image);
+		}
+
+		function point(x, y, canvas) {
+			ctx.beginPath();
+			ctx.arc(x, y, 5, 0, 2 * Math.PI, true);
+			ctx.fillStyle = 'red';
+			ctx.fill();
+			ctx.stroke();
+		}
+
+		var p1 = {
+			x: 310,
+			y: 50
+		},
+		p2 = {
+			x: 510,
+			y: 50
+		},
+		p3 = {
+			x: 300,
+			y: 215
+		},
+		p4 = {
+			x: 510,
+			y: 215
+		};
+
+		function loadCanvas(dataURL, canvas) {
+
+			var context = canvas.getContext('2d');
+
+			// load image from data url
+			var imageObj = new Image();
+			imageObj.onload = function () {
+				context.drawImage(this, 0, 0);
+				point(p1.x, p1.y, ctx);
+				point(p2.x, p2.y, ctx);
+
+				point(p3.x, p3.y, ctx);
+				point(p4.x, p4.y, ctx);
+
+				crop(p1, p2, p3, p4, ctx);
+			};
+
+			imageObj.src = dataURL;
+		}
+
+		var canvas = document.getElementById('myCanvas');
+		var ctx = canvas.getContext('2d');
+		loadCanvas('http://192.168.1.55:8000/img.jpg', canvas);
+	</script>
+</body>
+
+</html>
