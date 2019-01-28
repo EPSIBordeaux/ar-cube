@@ -1,0 +1,25 @@
+{
+  "name": "ar-cube",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EPSIBordeaux/ar-cube.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EPSIBordeaux/ar-cube/issues"
+  },
+  "homepage": "https://github.com/EPSIBordeaux/ar-cube#readme",
+  "devDependencies": {
+    "gulp": "^3.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-connect": "^5.7.0",
+    "gulp-open": "^3.0.1"
+  }
+}
