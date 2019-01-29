@@ -18,9 +18,9 @@
 </head>
 
 <body>
-
-	<canvas id="lol" width="500" height="500"></canvas>
 	<canvas id="myCanvas" width="1000" height="750"></canvas>
+	<canvas id="lol" width="500" height="500"></canvas>
+	<script src="./js/points.js"></script>
 	<script>
 		function getSquarePoints(points) {
 			var leftToRight = points.sort( (a,b) => a.x > b.x);
@@ -38,11 +38,11 @@
 			}
 		}
 
-		function crop(p1, p2, p3, p4, ctx){
+		function crop(face, ctx){
 			var canvasss = document.getElementById('lol');
 			var context = canvasss.getContext('2d');
 
-			var points = getSquarePoints([p1,p2,p3,p4]);
+			var points = getSquarePoints(face);
 
 			console.log(points);
 
@@ -54,7 +54,7 @@
 					points.rightTop.x - points.leftTop.x, 
 					points.rightBottom.x - points.leftBottom.x,   // "Get" a `50 * 50` (w * h) area from the source image (crop),
 					0, 0,     // Place the result at 0, 0 in the canvas,
-					200, 200); // With as width / height: 100 * 100 (scale)
+					500, 500); // With as width / height: 100 * 100 (scale)
 			}
 
 			image.src = canvas.toDataURL();
@@ -69,24 +69,7 @@
 			ctx.stroke();
 		}
 
-		var p1 = {
-			x: 290,
-			y: 420
-		},
-		p2 = {
-			x: 280,
-			y: 690
-		},
-		p3 = {
-			x: 545,
-			y: 680
-		},
-		p4 = {
-			x: 530,
-			y: 420
-		};
-
-		function loadCanvas(dataURL, canvas) {
+		function loadCanvas(dataURL, canvas, face) {
 
 			var context = canvas.getContext('2d');
 
@@ -94,13 +77,13 @@
 			var imageObj = new Image();
 			imageObj.onload = function () {
 				context.drawImage(this, 0, 0);
-				point(p1.x, p1.y, ctx);
-				point(p2.x, p2.y, ctx);
 
-				point(p3.x, p3.y, ctx);
-				point(p4.x, p4.y, ctx);
-
-				crop(p1, p2, p3, p4, ctx);
+				for (let i = 0; i < face.length; i++) {
+					const p = face[i];
+					point(p.x, p.y, ctx);
+				}
+				
+				crop(face, ctx);
 			};
 
 			imageObj.src = dataURL;
@@ -108,7 +91,7 @@
 
 		var canvas = document.getElementById('myCanvas');
 		var ctx = canvas.getContext('2d');
-		loadCanvas('http://192.168.1.55:8000/img.jpg', canvas);
+		loadCanvas('http://192.168.1.55:8000/img.jpg', canvas, face1);
 	</script>
 </body>
 
