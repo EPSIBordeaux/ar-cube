@@ -7,11 +7,13 @@
 			margin: 0px;
 			padding: 0px;
 		}
+
 		canvas {
 			padding: 0;
 			margin: 0;
 		}
-		img{
+
+		img {
 			display: none;
 		}
 	</style>
@@ -23,12 +25,12 @@
 	<script src="./js/points.js"></script>
 	<script>
 		function getSquarePoints(points) {
-			var leftToRight = points.sort( (a,b) => a.x > b.x);
-			var lefts =  leftToRight.slice(0, 2);
+			var leftToRight = points.sort((a, b) => a.x > b.x);
+			var lefts = leftToRight.slice(0, 2);
 			var right = leftToRight.slice(2, 4);
-			
-			var leftTopToBottom = lefts.sort( (a,b) => a.y > b.y);
-			var rightTopToBottom = right.sort( (a,b) => a.y > b.y);
+
+			var leftTopToBottom = lefts.sort((a, b) => a.y > b.y);
+			var rightTopToBottom = right.sort((a, b) => a.y > b.y);
 
 			return {
 				leftTop: leftTopToBottom[0],
@@ -38,21 +40,25 @@
 			}
 		}
 
-		function crop(face, ctx){
+		function crop(face, ctx) {
 			var canvasss = document.getElementById('lol');
 			var context = canvasss.getContext('2d');
 
 			var points = getSquarePoints(face);
 
-			console.log(points);
+			var leftToRight = Array.from(face).sort((a, b) => a.x > b.x ? 1 : -1);
+			var topToBottom = Array.from(face).sort((a, b) => a.y < b.y ? -1 : 1);
+
+			console.log(leftToRight)
+			console.log(topToBottom);
 
 			var image = new Image();
-			image.onload = function(){
+			image.onload = function () {
 				context.drawImage(image,
-					points.leftTop.x, points.leftTop.y,   // Start at 70/20 pixels from the left and the top of the image (crop),
-			
-					points.rightTop.x - points.leftTop.x, 
-					points.rightBottom.x - points.leftBottom.x,   // "Get" a `50 * 50` (w * h) area from the source image (crop),
+					leftToRight[0].x, topToBottom[0].y,   // Start at 70/20 pixels from the left and the top of the image (crop),
+
+					leftToRight[3].x - leftToRight[0].x,
+					topToBottom[3].y - topToBottom[0].y,   // "Get" a `50 * 50` (w * h) area from the source image (crop),
 					0, 0,     // Place the result at 0, 0 in the canvas,
 					500, 500); // With as width / height: 100 * 100 (scale)
 			}
@@ -82,7 +88,7 @@
 					const p = face[i];
 					point(p.x, p.y, ctx);
 				}
-				
+
 				crop(face, ctx);
 			};
 
