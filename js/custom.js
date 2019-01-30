@@ -1,7 +1,12 @@
+var square_bas, square_droite, square_gauche, square_haut1, square_haut2;
+
+var renderer, camera, scene
+
+var textureLoader = new THREE.TextureLoader();
+
 AFRAME.registerComponent('registerevents', {
     init: function () {
         this.marker = this.el;
-
         var group = document.querySelector('a-box').object3D;
 
         // MATERIALS 
@@ -22,7 +27,7 @@ AFRAME.registerComponent('registerevents', {
         group.add(square_gauche);
         square_droite = createAndPlaceSquare(material_color_violet, undefined, undefined, -1);
         group.add(square_droite);
- 
+
         axis = new THREE.AxisHelper(10);
         axis.position = square_haut2.position;
         square_haut2.add(axis);
@@ -31,17 +36,26 @@ AFRAME.registerComponent('registerevents', {
             var marker = this.object3D;
             var markerId = marker.id;
             console.log('markerFound', markerId);
-            // TODO: Add your own code here to react to the marker being found.
+            loadTexture(square_bas, "HIRO.jpg");
         });
 
         this.marker.addEventListener('markerLost', function () {
             var marker = this.object3D;
             var markerId = marker.id;
             console.log('markerLost', markerId);
-            // TODO: Add your own code here to react to the marker being lost.
         });
     }
 });
+
+AFRAME.registerComponent('setupscene', {
+    init: function () {
+        scene = this.el.object3D;
+        renderer = this.el.renderer;
+        camera = this.el.camera;
+    }
+});
+
+animate();
 
 function drawSquare(x1, y1, x2, y2) {
     // https://codepen.io/HelloPopartz/pen/EZOPEq
@@ -120,4 +134,27 @@ function getSquareSize(square) {
         width: size.x,
         heigth: size.y
     }
+}
+
+function loadTexture(element, texture) {
+    console.log(element, texture);
+
+    textureLoader.load(texture, function (texture) {
+        console.log(element.material);
+        element.color = undefined;
+        element.material.map = texture;
+        element.material.needsUpdate = true;
+    })
+}
+
+function render() {
+    if (renderer != undefined) {
+        renderer.render(scene, camera);
+    }
+}
+
+
+function animate() {
+    requestAnimationFrame(animate);
+    render();
 }
