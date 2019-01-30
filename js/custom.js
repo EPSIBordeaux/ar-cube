@@ -22,7 +22,7 @@ AFRAME.registerComponent('registerevents', {
         group.add(square_gauche);
         square_droite = createAndPlaceSquare(material_color_violet, undefined, undefined, -1);
         group.add(square_droite);
-
+ 
         axis = new THREE.AxisHelper(10);
         axis.position = square_haut2.position;
         square_haut2.add(axis);
