@@ -24,6 +24,13 @@
 
 	<script>
 
+		const WIDTH = window.innerWidth
+					|| document.documentElement.clientWidth
+					|| document.body.clientWidth;
+		const HEIGHT = window.innerHeight
+					|| document.documentElement.clientHeight
+					|| document.body.clientHeight;
+
 		var scene, camera, renderer, clock, deltaTime, totalTime;
 
 		var arToolkitSource, arToolkitContext;
@@ -32,11 +39,13 @@
 
 		var mesh1;
 
+		var square_bas_mesh, square_droite_mesh, square_gauche_mesh, square_haut1_mesh, square_haut2_mesh;
+
 		initialize();
 		animate();
 
-		// https://codepen.io/HelloPopartz/pen/EZOPEq
 		function drawSquare(x1, y1, x2, y2) {
+			// https://codepen.io/HelloPopartz/pen/EZOPEq
 			var square = new THREE.Geometry();
 			square.vertices.push(new THREE.Vector3(x1, y1, 0));
 			square.vertices.push(new THREE.Vector3(x1, y2, 0));
@@ -74,6 +83,55 @@
 			return placeSquare(square_mesh, relativeX, relativeY, relativeZ);
 		}
 
+		// function getPositionOnObject(object) {
+		// 	var vector = new THREE.Vector3();
+
+		// 	object.getWorldPosition(vector).project(camera);
+		// 	vector = object.uv;
+
+		// 	return vector;
+		// }
+
+		function getSquareCoordinates(square) {
+			var topLeft = new THREE.Vector2(),
+				topRight = new THREE.Vector2(),
+				bottomLeft = new THREE.Vector2(),
+				bottomRight = new THREE.Vector2();
+
+			var center = square.getWorldPosition();
+			var size = getSquareSize(square);
+
+			console.log(size, center);
+
+			topLeft.x = center.x - ((size.width).toFixed(1) / 2);
+			topLeft.y = center.y + ((size.heigth).toFixed(1) / 2);
+			topRight.x = center.x + ((size.width).toFixed(1) / 2);
+			topRight.y = center.y + ((size.heigth).toFixed(1) / 2);
+			bottomLeft.x = center.x - ((size.width).toFixed(1) / 2);
+			bottomLeft.y = center.y - ((size.heigth).toFixed(1) / 2);
+			bottomRight.x = center.x + ((size.width).toFixed(1) / 2);
+			bottomRight.y = center.y - ((size.heigth).toFixed(1) / 2);
+			
+
+			return {
+				topLeft: topLeft,
+				topRight: topRight,
+				bottomLeft: bottomLeft,
+				bottomRight: bottomRight
+			}
+		}
+
+		function getSquareSize(square) {
+			square.geometry.computeBoundingBox()
+
+			var size = square.geometry.boundingBox.getSize();
+
+			return {
+				width: size.x,
+				heigth: size.y
+			}
+		}
+
 		function initialize() {
 			scene = new THREE.Scene();
 
@@ -88,8 +146,9 @@
 				alpha: true
 			});
 
+
 			renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-			renderer.setSize(640, 480);
+			renderer.setSize(WIDTH, HEIGHT);
 			renderer.domElement.style.position = 'absolute'
 			renderer.domElement.style.top = '0px'
 			renderer.domElement.style.left = '0px'
@@ -169,20 +228,24 @@
 			var material_color_red = new THREE.MeshBasicMaterial({ color: 0xff400c, side: THREE.DoubleSide });
 			var material_color_violet = new THREE.MeshBasicMaterial({ color: 0xda0cff, side: THREE.DoubleSide });
 
-			var square_bas_mesh = createAndPlaceSquare(material_color_orange, -1, undefined, undefined);
+			square_bas_mesh = createAndPlaceSquare(material_color_orange, -1, undefined, undefined);
 			markerRoot1.add(square_bas_mesh);
 
-			var square_haut1_mesh = createAndPlaceSquare(material_color_cyan, -1, undefined, -2);
+			square_haut1_mesh = createAndPlaceSquare(material_color_cyan, -1, undefined, -2);
 			markerRoot1.add(square_haut1_mesh);
 
-			var square_haut2_mesh = createAndPlaceSquare(material_color_lightOrange, -1, undefined, -3);
+			square_haut2_mesh = createAndPlaceSquare(material_color_lightOrange, -1, undefined, -3);
 			markerRoot1.add(square_haut2_mesh);
 
-			var square_gauche_mesh = createAndPlaceSquare(material_color_red, -2, undefined, -1);
+			square_gauche_mesh = createAndPlaceSquare(material_color_red, -2, undefined, -1);
 			markerRoot1.add(square_gauche_mesh);
 
-			var square_droite_mesh = createAndPlaceSquare(material_color_violet, undefined, undefined, -1);
+			square_droite_mesh = createAndPlaceSquare(material_color_violet, undefined, undefined, -1);
 			markerRoot1.add(square_droite_mesh);
+
+			axis = new THREE.AxisHelper(10);
+			axis.position = square_haut2_mesh.position;
+   			square_haut2_mesh.add(axis);
 		}
 
 		function update() {
@@ -196,11 +259,17 @@
 			renderer.render(scene, camera);
 		}
 
+		var i = 0;
 
 		function animate() {
 			requestAnimationFrame(animate);
 			deltaTime = clock.getDelta();
 			totalTime += deltaTime;
+
+			if(i%100 === 0)
+				console.log(getSquareCoordinates(square_bas_mesh), getSquareCoordinates(square_haut2_mesh))
+
+			i++;
 			update();
 			render();
 		}
