@@ -1,281 +1,37 @@
 <!DOCTYPE html>
 
 <head>
-	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<title>Hello, AR Cube!</title>
-	<!-- include three.js library -->
-	<script src='js/three.js'></script>
-	<!-- include jsartookit -->
-	<script src="jsartoolkit5/artoolkit.min.js"></script>
-	<script src="jsartoolkit5/artoolkit.api.js"></script>
-	<!-- include threex.artoolkit -->
-	<script src="threex/threex-artoolkitsource.js"></script>
-	<script src="threex/threex-artoolkitcontext.js"></script>
-	<script src="threex/threex-arbasecontrols.js"></script>
-	<script src="threex/threex-armarkercontrols.js"></script>
+    <title></title>
+    <meta charset="utf-8" />
+
+    <script src="/js/aframe.min.js"></script>
+    <script src="/js/aframe-ar.js"></script>
+    <script src="./js/custom.js"></script>
+
 </head>
 
 <body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+    <div style='position: fixed; top: 10px; width:100%; text-align: center; z-index: 1;'>
+        <a href="https://github.com/jeromeetienne/AR.js/" target="_blank">AR.js</a> - marker events example for a-frame
+        - look at the js console
+        <br />
+        Contact me any time at <a href='https://twitter.com/jerome_etienne' target='_blank'>@jerome_etienne</a>
+    </div>
+    <a-scene embedded arjs='sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;'>
+        <!-- handle hiro marker -->
+        <!-- 'registerevents' will register event listeners for the marker when it is found and lost,
+		as defined in the inline script above -->
+        <a-marker preset='hiro' id='marker-hiro' registerevents>
+            <a-box position='0 0.5 0' material='opacity: 0.5; side: double;color:blue;'>
+                <a-torus-knot radius='0.26' radius-tubular='0.05'>
+                    <a-animation attribute="rotation" to="360 0 0" dur="5000" easing='linear' repeat="indefinite"></a-animation>
+                </a-torus-knot>
+            </a-box>
+        </a-marker>
 
-	<!-- 
-  Example created by Lee Stemkoski: https://github.com/stemkoski
-  Based on the AR.js library and examples created by Jerome Etienne: https://github.com/jeromeetienne/AR.js/
--->
-
-	<script>
-
-		const WIDTH = window.innerWidth
-					|| document.documentElement.clientWidth
-					|| document.body.clientWidth;
-		const HEIGHT = window.innerHeight
-					|| document.documentElement.clientHeight
-					|| document.body.clientHeight;
-
-		var scene, camera, renderer, clock, deltaTime, totalTime;
-
-		var arToolkitSource, arToolkitContext;
-
-		var markerRoot1, markerRoot2;
-
-		var mesh1;
-
-		var square_bas_mesh, square_droite_mesh, square_gauche_mesh, square_haut1_mesh, square_haut2_mesh;
-
-		initialize();
-		animate();
-
-		function drawSquare(x1, y1, x2, y2) {
-			// https://codepen.io/HelloPopartz/pen/EZOPEq
-			var square = new THREE.Geometry();
-			square.vertices.push(new THREE.Vector3(x1, y1, 0));
-			square.vertices.push(new THREE.Vector3(x1, y2, 0));
-			square.vertices.push(new THREE.Vector3(x2, y1, 0));
-			square.vertices.push(new THREE.Vector3(x2, y2, 0));
-
-			square.faces.push(new THREE.Face3(0, 1, 2));
-			square.faces.push(new THREE.Face3(1, 2, 3));
-			return square;
-		}
-
-		function placeSquare(square_mesh, relativeX, relativeY, relativeZ) {
-			if (relativeX != undefined) {
-				square_mesh.position.x = square_mesh.position.x + relativeX;
-			}
-
-			if (relativeY != undefined) {
-				square_mesh.position.y = square_mesh.position.y + relativeY;
-			}
-
-			if (relativeZ != undefined) {
-				square_mesh.position.z = square_mesh.position.z + relativeZ;
-			}
-			return square_mesh;
-		}
-
-		function createAndPlaceSquare(material, relativeX, relativeY, relativeZ) {
-			var geometry = drawSquare(0.5, 0.5, 1.5, 1.5);
-			relativeX = relativeX || undefined;
-			relativeY = relativeY || undefined;
-			relativeZ = relativeZ || undefined;
-
-			var square_mesh = new THREE.Mesh(geometry, material);
-			square_mesh.rotation.x = Math.PI / 2;
-			return placeSquare(square_mesh, relativeX, relativeY, relativeZ);
-		}
-
-		// function getPositionOnObject(object) {
-		// 	var vector = new THREE.Vector3();
-
-		// 	object.getWorldPosition(vector).project(camera);
-		// 	vector = object.uv;
-
-		// 	return vector;
-		// }
-
-		function getSquareCoordinates(square) {
-			var topLeft = new THREE.Vector2(),
-				topRight = new THREE.Vector2(),
-				bottomLeft = new THREE.Vector2(),
-				bottomRight = new THREE.Vector2();
-
-			var center = square.getWorldPosition();
-			var size = getSquareSize(square);
-
-			console.log(size, center);
-
-			topLeft.x = center.x - ((size.width).toFixed(1) / 2);
-			topLeft.y = center.y + ((size.heigth).toFixed(1) / 2);
-			topRight.x = center.x + ((size.width).toFixed(1) / 2);
-			topRight.y = center.y + ((size.heigth).toFixed(1) / 2);
-			bottomLeft.x = center.x - ((size.width).toFixed(1) / 2);
-			bottomLeft.y = center.y - ((size.heigth).toFixed(1) / 2);
-			bottomRight.x = center.x + ((size.width).toFixed(1) / 2);
-			bottomRight.y = center.y - ((size.heigth).toFixed(1) / 2);
-			
-
-			return {
-				topLeft: topLeft,
-				topRight: topRight,
-				bottomLeft: bottomLeft,
-				bottomRight: bottomRight
-			}
-		}
-
-		function getSquareSize(square) {
-			square.geometry.computeBoundingBox()
-
-			var size = square.geometry.boundingBox.getSize();
-
-			return {
-				width: size.x,
-				heigth: size.y
-			}
-		}
-
-		function initialize() {
-			scene = new THREE.Scene();
-
-			let ambientLight = new THREE.AmbientLight(0xcccccc, 0.5);
-			scene.add(ambientLight);
-
-			camera = new THREE.Camera();
-			scene.add(camera);
-
-			renderer = new THREE.WebGLRenderer({
-				antialias: true,
-				alpha: true
-			});
-
-
-			renderer.setClearColor(new THREE.Color('lightgrey'), 0)
-			renderer.setSize(WIDTH, HEIGHT);
-			renderer.domElement.style.position = 'absolute'
-			renderer.domElement.style.top = '0px'
-			renderer.domElement.style.left = '0px'
-			document.body.appendChild(renderer.domElement);
-
-			clock = new THREE.Clock();
-			deltaTime = 0;
-			totalTime = 0;
-
-			////////////////////////////////////////////////////////////
-			// setup arToolkitSource
-			////////////////////////////////////////////////////////////
-
-			arToolkitSource = new THREEx.ArToolkitSource({
-				sourceType: 'webcam',
-			});
-
-			function onResize() {
-				arToolkitSource.onResize()
-				arToolkitSource.copySizeTo(renderer.domElement)
-				if (arToolkitContext.arController !== null) {
-					arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)
-				}
-			}
-
-			arToolkitSource.init(function onReady() {
-				onResize()
-			});
-
-			// handle resize event
-			window.addEventListener('resize', function () {
-				onResize()
-			});
-
-			////////////////////////////////////////////////////////////
-			// setup arToolkitContext
-			////////////////////////////////////////////////////////////	
-
-			// create atToolkitContext
-			arToolkitContext = new THREEx.ArToolkitContext({
-				cameraParametersUrl: 'data/camera_para.dat',
-				detectionMode: 'mono'
-			});
-
-			// copy projection matrix to camera when initialization complete
-			arToolkitContext.init(function onCompleted() {
-				camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
-			});
-
-			////////////////////////////////////////////////////////////
-			// setup markerRoots
-			////////////////////////////////////////////////////////////
-
-			// build markerControls
-			markerRoot1 = new THREE.Group();
-			scene.add(markerRoot1);
-			let markerControls1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, {
-				type: 'pattern', patternUrl: "data/hiro.patt",
-			})
-
-			let geometry1 = new THREE.CubeGeometry(1, 1, 1);
-			let material1 = new THREE.MeshNormalMaterial({
-				transparent: true,
-				opacity: 0.5,
-				side: THREE.DoubleSide
-			});
-
-			mesh1 = new THREE.Mesh(geometry1, material1);
-			mesh1.position.y = 0.5;
-
-			markerRoot1.add(mesh1);
-
-			// MATERIALS 
-			var material_color_orange = new THREE.MeshBasicMaterial({ color: 0xF6831E, side: THREE.DoubleSide });
-			var material_color_cyan = new THREE.MeshBasicMaterial({ color: 0x435354, side: THREE.DoubleSide });
-			var material_color_lightOrange = new THREE.MeshBasicMaterial({ color: 0xffce0c, side: THREE.DoubleSide });
-			var material_color_red = new THREE.MeshBasicMaterial({ color: 0xff400c, side: THREE.DoubleSide });
-			var material_color_violet = new THREE.MeshBasicMaterial({ color: 0xda0cff, side: THREE.DoubleSide });
-
-			square_bas_mesh = createAndPlaceSquare(material_color_orange, -1, undefined, undefined);
-			markerRoot1.add(square_bas_mesh);
-
-			square_haut1_mesh = createAndPlaceSquare(material_color_cyan, -1, undefined, -2);
-			markerRoot1.add(square_haut1_mesh);
-
-			square_haut2_mesh = createAndPlaceSquare(material_color_lightOrange, -1, undefined, -3);
-			markerRoot1.add(square_haut2_mesh);
-
-			square_gauche_mesh = createAndPlaceSquare(material_color_red, -2, undefined, -1);
-			markerRoot1.add(square_gauche_mesh);
-
-			square_droite_mesh = createAndPlaceSquare(material_color_violet, undefined, undefined, -1);
-			markerRoot1.add(square_droite_mesh);
-
-			axis = new THREE.AxisHelper(10);
-			axis.position = square_haut2_mesh.position;
-   			square_haut2_mesh.add(axis);
-		}
-
-		function update() {
-			// update artoolkit on every frame
-			if (arToolkitSource.ready !== false)
-				arToolkitContext.update(arToolkitSource.domElement);
-		}
-
-
-		function render() {
-			renderer.render(scene, camera);
-		}
-
-		var i = 0;
-
-		function animate() {
-			requestAnimationFrame(animate);
-			deltaTime = clock.getDelta();
-			totalTime += deltaTime;
-
-			if(i%100 === 0)
-				console.log(getSquareCoordinates(square_bas_mesh), getSquareCoordinates(square_haut2_mesh))
-
-			i++;
-			update();
-			render();
-		}
-
-	</script>
-
+        <!-- add a simple camera -->
+        <a-entity camera></a-entity>
+    </a-scene>
 </body>
 
 </html>
