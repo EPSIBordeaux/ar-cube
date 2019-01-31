@@ -17,15 +17,15 @@ AFRAME.registerComponent('registerevents', {
         var material_color_violet = new THREE.MeshBasicMaterial({ color: 0xda0cff, side: THREE.DoubleSide });
 
         // MESH 
-        square_bas = createAndPlaceSquare(material_color_orange, -1, undefined, undefined);
+        square_bas = createAndPlaceSquare(material_color_orange, 0,-.5, 1);
         group.add(square_bas);
-        square_haut1 = createAndPlaceSquare(material_color_cyan, -1, undefined, -2);
+        square_haut1 = createAndPlaceSquare(material_color_cyan, 0, -.5, -1);
         group.add(square_haut1);
-        square_haut2 = createAndPlaceSquare(material_color_lightOrange, -1, undefined, -3);
+        square_haut2 = createAndPlaceSquare(material_color_lightOrange, 0, -.5, -2);
         group.add(square_haut2);
-        square_gauche = createAndPlaceSquare(material_color_red, -2, undefined, -1);
+        square_gauche = createAndPlaceSquare(material_color_red, -1, -.5, 0);
         group.add(square_gauche);
-        square_droite = createAndPlaceSquare(material_color_violet, undefined, undefined, -1);
+        square_droite = createAndPlaceSquare(material_color_violet, 1, -.5, 0);
         group.add(square_droite);
 
         axis = new THREE.AxisHelper(10);
@@ -37,6 +37,7 @@ AFRAME.registerComponent('registerevents', {
             var markerId = marker.id;
             console.log('markerFound', markerId);
             loadTexture(square_bas, "HIRO.jpg");
+            loadTexture(square_haut1, "HIRO.jpg");
         });
 
         this.marker.addEventListener('markerLost', function () {
@@ -57,19 +58,6 @@ AFRAME.registerComponent('setupscene', {
 
 animate();
 
-function drawSquare(x1, y1, x2, y2) {
-    // https://codepen.io/HelloPopartz/pen/EZOPEq
-    var square = new THREE.Geometry();
-    square.vertices.push(new THREE.Vector3(x1, y1, .5));
-    square.vertices.push(new THREE.Vector3(x1, y2, .5));
-    square.vertices.push(new THREE.Vector3(x2, y1, .5));
-    square.vertices.push(new THREE.Vector3(x2, y2, .5));
-
-    square.faces.push(new THREE.Face3(0, 1, 2));
-    square.faces.push(new THREE.Face3(1, 2, 3));
-    return square;
-}
-
 function placeSquare(square_mesh, relativeX, relativeY, relativeZ) {
     if (relativeX != undefined) {
         square_mesh.position.x = square_mesh.position.x + relativeX;
@@ -86,11 +74,12 @@ function placeSquare(square_mesh, relativeX, relativeY, relativeZ) {
 }
 
 function createAndPlaceSquare(material, relativeX, relativeY, relativeZ) {
-    var geometry = drawSquare(0.5, 0.5, 1.5, 1.5);
+    var geometry = new THREE.PlaneGeometry(1,1);
     relativeX = relativeX || undefined;
     relativeY = relativeY || undefined;
     relativeZ = relativeZ || undefined;
 
+   
     var square_mesh = new THREE.Mesh(geometry, material);
     square_mesh.rotation.x = Math.PI / 2;
     return placeSquare(square_mesh, relativeX, relativeY, relativeZ);
@@ -137,13 +126,11 @@ function getSquareSize(square) {
 }
 
 function loadTexture(element, texture) {
-    console.log(element, texture);
+    element.material.needsUpdate = true;
 
     textureLoader.load(texture, function (texture) {
-        console.log(element.material);
         element.color = undefined;
         element.material.map = texture;
-        element.material.needsUpdate = true;
     })
 }
 
