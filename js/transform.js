@@ -14,8 +14,8 @@ img.onload= function () {
 
   for (let i = 0; i < faces.length; i++) {
     const face = faces[i];
-    crop(getSquarePoints(face), 200, 200);
-    var points = points.concat(face1);
+    crop(getSquarePoints(face), 150, 150);
+    var points = points.concat(face);
   }
   
 	for (let i = 0; i < points.length; i++) {
@@ -43,7 +43,7 @@ function getSquarePoints(points) {
 
 function drawPoint(x, y, ctx){
   ctx.beginPath();
-	ctx.arc(x, y, 10, 0, 2 * Math.PI, true);
+	ctx.arc(x, y, 3, 0, 2 * Math.PI, true);
 	ctx.fillStyle="red";
 	ctx.fill();
   ctx.stroke();
