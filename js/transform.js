@@ -22,9 +22,10 @@ function from(src) {
 
     facesBatch.onchange = function() {
       for (let i = 0; i < this.batch.length; i++) {
-        const face = this.batch[i];
-        crop(img,getSquarePoints(face), 150, 150);
-      }
+        const face = getSquarePoints(this.batch[i]);
+        console.log(face);
+        crop(img,face, 150, 150);
+       }
       this.faces = [];
     }
 
@@ -43,12 +44,12 @@ function from(src) {
 }
 
 function getSquarePoints(points) {
-	var leftToRight = points.sort((a, b) => a.x > b.x);
-	var lefts = leftToRight.slice(0, 2);
-	var right = leftToRight.slice(2, 4);
+  var leftToRight = Array.from(points).sort((a, b) => a.x > b.x ? -1 : 1);
+	var lefts = Array.from(leftToRight).slice(0, 2);
+	var right = Array.from(leftToRight).slice(2, 4);
 
-	var leftTopToBottom = lefts.sort((a, b) => a.y > b.y);
-	var rightTopToBottom = right.sort((a, b) => a.y > b.y);
+	var leftTopToBottom = Array.from(lefts).sort((a, b) => a.y > b.y ? -1 : 1);
+	var rightTopToBottom = Array.from(right).sort((a, b) => a.y > b.y ? -1 : 1);
 
 	return {
 		TL: leftTopToBottom[0],
@@ -58,10 +59,10 @@ function getSquarePoints(points) {
 	}
 }
 
-function drawPoint(x, y, ctx){
+function drawPoint(x, y, ctx, color){
   ctx.beginPath();
 	ctx.arc(x, y, 3, 0, 2 * Math.PI, true);
-	ctx.fillStyle="red";
+	ctx.fillStyle=color;
 	ctx.fill();
   ctx.stroke();
 }
