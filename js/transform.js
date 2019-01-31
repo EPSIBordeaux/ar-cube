@@ -1,23 +1,29 @@
-var canvas=document.getElementById("canvas");
-var ctx=canvas.getContext("2d");
-var canvas1=document.getElementById("canvas1");
-var ctx1=canvas1.getContext("2d");
+var canvasSource=document.getElementById("source"),
+  ctxSource=canvasSource.getContext("2d");
 
-// anchors defining the warped rectangle
-var anchors= getSquarePoints(face1); 
-
-// cornerpoints defining the desire unwarped rectangle
-var unwarped={
-  TL:{x:0,y:0},        // r
-  TR:{x:300,y:0},      // g
-  BR:{x:300,y:300},    // b
-  BL:{x:0,y:300},      // gold
-}
 
 // load example image
 var img=new Image();
-img.onload=start;
 img.src="img.jpg";
+img.onload= function () {
+  var points = [];
+
+  // set canvas sizes equal to image size
+  canvasSource.width=img.width;
+  canvasSource.height=img.height;
+
+  for (let i = 0; i < faces.length; i++) {
+    const face = faces[i];
+    crop(getSquarePoints(face), 200, 200);
+    var points = points.concat(face1);
+  }
+  
+	for (let i = 0; i < points.length; i++) {
+		const point = points[i];
+		drawPoint(point.x, point.y, ctxSource);
+	}
+
+}
 
 function getSquarePoints(points) {
 	var leftToRight = points.sort((a, b) => a.x > b.x);
@@ -43,25 +49,30 @@ function drawPoint(x, y, ctx){
   ctx.stroke();
 }
 
-function start(){
+function crop(anchors, width, height){
 
-  // set canvas sizes equal to image size
-  cw=canvas.width=canvas1.width=img.width;
-  ch=canvas.height=canvas1.height=img.height;
+  var unwarped={
+    TL:{x:0,y:0},        // r
+    TR:{x:width,y:0},      // g
+    BR:{x:width,y:height},    // b
+    BL:{x:0,y:height},      // gold
+  }
+
+  var canvasDist=document.createElement('canvas'),
+  ctxDist=canvasDist.getContext("2d");
+  
+  document.body.appendChild(canvasDist);
+
+  canvasDist.width=width;
+  canvasDist.height=height;
+
+
 
   // draw the example image on the source canvas
-  ctx.drawImage(img,0,0);
+  ctxSource.drawImage(img,0,0);
 
   // unwarp the source rectangle and draw it to the destination canvas
-	unwarp(anchors,unwarped,ctx1);
-	
-	var points = Object.values(anchors);
-
-	for (let i = 0; i < points.length; i++) {
-		const point = points[i];
-		drawPoint(point.x, point.y, ctx);
-	}
-
+	unwarp(anchors,unwarped,ctxDist);
 }
 
 
@@ -78,7 +89,7 @@ function unwarp(anchors,unwarped,context){
              );
 
   // eliminate slight space between triangles
-  ctx1.translate(-1,1);
+  context.translate(-1,1);
 
   // unwarp the top-right triangle of the warped polygon
   mapTriangle(context,
