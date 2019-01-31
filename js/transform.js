@@ -1,28 +1,45 @@
-var canvasSource=document.getElementById("source"),
-  ctxSource=canvasSource.getContext("2d");
-
-
-// load example image
-var img=new Image();
-img.src="img.jpg";
-img.onload= function () {
-  var points = [];
-
-  // set canvas sizes equal to image size
-  canvasSource.width=img.width;
-  canvasSource.height=img.height;
-
-  for (let i = 0; i < faces.length; i++) {
-    const face = faces[i];
-    crop(getSquarePoints(face), 150, 150);
-    var points = points.concat(face);
-  }
+function from(src) {
+  var img=new Image(),
+    canvasSource=document.createElement('canvas'),
+    ctxSource=canvasSource.getContext("2d");
   
-	for (let i = 0; i < points.length; i++) {
-		const point = points[i];
-		drawPoint(point.x, point.y, ctxSource);
-	}
+  document.body.appendChild(canvasSource);
 
+  var facesBatch = {
+    batch: [],
+    onchange: function(){},
+    add: function(face){
+      this.batch.push(face);
+      this.onchange();
+    }
+  }
+
+  img.src=src;
+  img.onload= function () {
+    // set canvas sizes equal to image size
+    canvasSource.width=img.width;
+    canvasSource.height=img.height;
+
+    facesBatch.onchange = function() {
+      for (let i = 0; i < this.batch.length; i++) {
+        const face = this.batch[i];
+        crop(img,getSquarePoints(face), 150, 150);
+      }
+      this.faces = [];
+    }
+
+    facesBatch.onchange();
+
+    // draw the example image on the source canvas
+    ctxSource.drawImage(img,0,0);
+  }
+
+  return {
+    get: function(face) {
+      facesBatch.add(face);
+      return this;
+    }
+  }
 }
 
 function getSquarePoints(points) {
@@ -49,7 +66,7 @@ function drawPoint(x, y, ctx){
   ctx.stroke();
 }
 
-function crop(anchors, width, height){
+function crop(img, anchors, width, height){
 
   var unwarped={
     TL:{x:0,y:0},        // r
@@ -66,24 +83,19 @@ function crop(anchors, width, height){
   canvasDist.width=width;
   canvasDist.height=height;
 
-
-
-  // draw the example image on the source canvas
-  ctxSource.drawImage(img,0,0);
-
   // unwarp the source rectangle and draw it to the destination canvas
-	unwarp(anchors,unwarped,ctxDist);
+	unwarp(img, anchors,unwarped,ctxDist);
 }
 
-
 // unwarp the source rectangle
-function unwarp(anchors,unwarped,context){
+function unwarp(img,anchors,unwarped,context){
 
   // clear the destination canvas
   context.clearRect(0,0,context.canvas.width,context.canvas.height);
 
   // unwarp the bottom-left triangle of the warped polygon
-  mapTriangle(context,
+  mapTriangle(img, 
+              context,
               anchors.TL,  anchors.BR,  anchors.BL,
               unwarped.TL, unwarped.BR, unwarped.BL
              );
@@ -92,17 +104,17 @@ function unwarp(anchors,unwarped,context){
   context.translate(-1,1);
 
   // unwarp the top-right triangle of the warped polygon
-  mapTriangle(context,
+  mapTriangle(img,
+              context,
               anchors.TL,  anchors.TR,  anchors.BR,
               unwarped.TL, unwarped.TR, unwarped.BR
              );
 
 }
 
-
 // Perspective mapping: Map warped triangle into unwarped triangle
 // Attribution: (SO user: 6502), http://stackoverflow.com/questions/4774172/image-manipulation-and-texture-mapping-using-html5-canvas/4774298#4774298
-function mapTriangle(ctx,p0, p1, p2, p_0, p_1, p_2) {
+function mapTriangle(img, ctx,p0, p1, p2, p_0, p_1, p_2) {
 
   // break out the individual triangles x's & y's
   var x0=p_0.x, y0=p_0.y;
