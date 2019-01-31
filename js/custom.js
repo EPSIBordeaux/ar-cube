@@ -17,19 +17,15 @@ AFRAME.registerComponent('registerevents', {
         var material_color_violet = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
 
         // MESH 
-        square_bas = createAndPlaceSquare(material_color_orange, 0, 0, 0.5);
-        square_bas.rotateX(Math.PI /2 );
+        square_bas = createAndPlaceSquare(material_color_orange, 0,-.5, 1);
         group.add(square_bas);
-        square_haut1 = createAndPlaceSquare(material_color_cyan, 0, 0, -.5);
-        square_haut1.rotateX(Math.PI / 2);
+        square_haut1 = createAndPlaceSquare(material_color_cyan, 0, -.5, -1);
         group.add(square_haut1);
-        square_haut2 = createAndPlaceSquare(material_color_lightOrange, 0, 0.5, 0);
+        square_haut2 = createAndPlaceSquare(material_color_lightOrange, 0, -.5, -2);
         group.add(square_haut2);
-        square_gauche = createAndPlaceSquare(material_color_red, -0.5, 0, 0);
-        square_gauche.rotateY(Math.PI / 2);
+        square_gauche = createAndPlaceSquare(material_color_red, -1, -.5, 0);
         group.add(square_gauche);
-        square_droite = createAndPlaceSquare(material_color_violet, 0.5, 0, 0);
-        square_droite.rotateY(Math.PI / 2);
+        square_droite = createAndPlaceSquare(material_color_violet, 1, -.5, 0);
         group.add(square_droite);
 
         this.marker.addEventListener('markerFound', function () {
