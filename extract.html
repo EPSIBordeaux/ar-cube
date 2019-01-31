@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<style>
+<style>
 		body {
 			margin: 0px;
 			padding: 0px;
@@ -20,84 +20,12 @@
 </head>
 
 <body>
-	<canvas id="myCanvas" width="1000" height="750"></canvas>
-	<canvas id="lol" width="500" height="500"></canvas>
+	<canvas id="canvas" width=300 height=300></canvas>
+	<canvas id="canvas1" width=300 height=300></canvas>
 	<script src="./js/points.js"></script>
+	<script src="./js/transform.js"></script>
 	<script>
-		function getSquarePoints(points) {
-			var leftToRight = points.sort((a, b) => a.x > b.x);
-			var lefts = leftToRight.slice(0, 2);
-			var right = leftToRight.slice(2, 4);
-
-			var leftTopToBottom = lefts.sort((a, b) => a.y > b.y);
-			var rightTopToBottom = right.sort((a, b) => a.y > b.y);
-
-			return {
-				leftTop: leftTopToBottom[0],
-				rightTop: rightTopToBottom[0],
-				leftBottom: leftTopToBottom[1],
-				rightBottom: rightTopToBottom[1]
-			}
-		}
-
-		function crop(face, ctx) {
-			var canvasss = document.getElementById('lol');
-			var context = canvasss.getContext('2d');
-
-			var points = getSquarePoints(face);
-
-			var leftToRight = Array.from(face).sort((a, b) => a.x > b.x ? 1 : -1);
-			var topToBottom = Array.from(face).sort((a, b) => a.y < b.y ? -1 : 1);
-
-			console.log(leftToRight)
-			console.log(topToBottom);
-
-			var image = new Image();
-			image.onload = function () {
-				context.drawImage(image,
-					leftToRight[0].x, topToBottom[0].y,   // Start at 70/20 pixels from the left and the top of the image (crop),
-
-					leftToRight[3].x - leftToRight[0].x,
-					topToBottom[3].y - topToBottom[0].y,   // "Get" a `50 * 50` (w * h) area from the source image (crop),
-					0, 0,     // Place the result at 0, 0 in the canvas,
-					500, 500); // With as width / height: 100 * 100 (scale)
-			}
-
-			image.src = canvas.toDataURL();
-			document.body.appendChild(image);
-		}
-
-		function point(x, y, canvas) {
-			ctx.beginPath();
-			ctx.arc(x, y, 5, 0, 2 * Math.PI, true);
-			ctx.fillStyle = 'red';
-			ctx.fill();
-			ctx.stroke();
-		}
-
-		function loadCanvas(dataURL, canvas, face) {
-
-			var context = canvas.getContext('2d');
-
-			// load image from data url
-			var imageObj = new Image();
-			imageObj.onload = function () {
-				context.drawImage(this, 0, 0);
-
-				for (let i = 0; i < face.length; i++) {
-					const p = face[i];
-					point(p.x, p.y, ctx);
-				}
-
-				crop(face, ctx);
-			};
-
-			imageObj.src = dataURL;
-		}
-
-		var canvas = document.getElementById('myCanvas');
-		var ctx = canvas.getContext('2d');
-		loadCanvas('http://192.168.1.55:8000/img.jpg', canvas, face1);
+		
 	</script>
 </body>
 
