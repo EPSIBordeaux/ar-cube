@@ -3,7 +3,7 @@ function from(src) {
     canvasSource=document.createElement('canvas'),
     ctxSource=canvasSource.getContext("2d");
   
-  document.body.appendChild(canvasSource);
+  // document.body.appendChild(canvasSource);
 
   var facesBatch = {
     batch: [],
@@ -20,18 +20,23 @@ function from(src) {
     canvasSource.width=img.width;
     canvasSource.height=img.height;
 
+    // draw the example image on the source canvas
+    ctxSource.drawImage(img,0,0);
+
     facesBatch.onchange = function() {
       for (let i = 0; i < this.batch.length; i++) {
         const face = getSquarePoints(this.batch[i].face);
-        this.batch[i].callback(crop(img,face, 150, 150));
+        this.batch[i].callback(crop(img,face, 256, 256));
+        for (let y = 0; y < this.batch[i].face.length; y++) {
+          const p = this.batch[i].face[y];
+          drawPoint(p.x,p.y, ctxSource, 'red')
+        }
        }
       this.faces = [];
     }
 
     facesBatch.onchange();
 
-    // draw the example image on the source canvas
-    ctxSource.drawImage(img,0,0);
   }
 
   return {
@@ -63,7 +68,6 @@ function drawPoint(x, y, ctx, color){
 	ctx.arc(x, y, 3, 0, 2 * Math.PI, true);
 	ctx.fillStyle=color;
 	ctx.fill();
-  ctx.stroke();
 }
 
 function crop(img, anchors, width, height){
@@ -78,7 +82,7 @@ function crop(img, anchors, width, height){
   var canvasDist=document.createElement('canvas'),
   ctxDist=canvasDist.getContext("2d");
   
-  document.body.appendChild(canvasDist);
+  //document.body.appendChild(canvasDist);
 
   canvasDist.width=width;
   canvasDist.height=height;

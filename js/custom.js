@@ -28,10 +28,6 @@ AFRAME.registerComponent('registerevents', {
         square_droite = createAndPlaceSquare(material_color_violet, 1, -.5, 0);
         group.add(square_droite);
 
-        axis = new THREE.AxisHelper(10);
-        axis.position = square_haut2.position;
-        square_haut2.add(axis);
-
         this.marker.addEventListener('markerFound', function () {
             var marker = this.object3D;
             var markerId = marker.id;
@@ -51,23 +47,23 @@ AFRAME.registerComponent('registerevents', {
              
             var texture = from(canvas.toDataURL());
 
-            texture.get(getSquareCoordinates(camera, square_bas), function(url){
+            texture.get(getSquareCoordinates(camera, square_bas, video), function(url){
                 loadTexture(square_bas, url);
             });
             
-            texture.get(getSquareCoordinates(camera, square_droite), function(url){
+            texture.get(getSquareCoordinates(camera, square_droite, video), function(url){
                 loadTexture(square_droite, url);
             });
 
-            texture.get(getSquareCoordinates(camera, square_gauche), function(url){
+            texture.get(getSquareCoordinates(camera, square_gauche, video), function(url){
                 loadTexture(square_gauche, url);
             });
 
-            texture.get(getSquareCoordinates(camera, square_haut1), function(url){
+            texture.get(getSquareCoordinates(camera, square_haut1, video), function(url){
                 loadTexture(square_haut1, url);
             });
 
-            texture.get(getSquareCoordinates(camera, square_haut2), function(url){
+            texture.get(getSquareCoordinates(camera, square_haut2, video), function(url){
                 loadTexture(square_haut2, url);
             });
             
@@ -118,8 +114,8 @@ function createAndPlaceSquare(material, relativeX, relativeY, relativeZ) {
     return placeSquare(square_mesh, relativeX, relativeY, relativeZ);
 }
 
-function getSquareCoordinates(camera, square) {
-
+function getSquareCoordinates(camera, square, video) {
+    
     square.updateMatrixWorld();
 
     var points = [];
@@ -127,8 +123,8 @@ function getSquareCoordinates(camera, square) {
         var vector = square.geometry.vertices[i].clone();
         var projectedPosition = vector.applyMatrix4(square.matrixWorld).project(camera);
 
-        projectedPosition.x = Math.round((vector.x + 1) / 2 * window.innerWidth);
-        projectedPosition.y = Math.round(-(vector.y - 1) / 2 * window.innerHeight);
+        projectedPosition.x = Math.round((vector.x + 1) / 2 * video.offsetWidth);
+        projectedPosition.y = Math.round(-(vector.y - 1) / 2 * video.offsetHeight);
       
         points.push(projectedPosition);
     }
