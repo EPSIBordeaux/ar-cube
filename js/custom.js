@@ -60,10 +60,10 @@ animate();
 function drawSquare(x1, y1, x2, y2) {
     // https://codepen.io/HelloPopartz/pen/EZOPEq
     var square = new THREE.Geometry();
-    square.vertices.push(new THREE.Vector3(x1, y1, 0));
-    square.vertices.push(new THREE.Vector3(x1, y2, 0));
-    square.vertices.push(new THREE.Vector3(x2, y1, 0));
-    square.vertices.push(new THREE.Vector3(x2, y2, 0));
+    square.vertices.push(new THREE.Vector3(x1, y1, .5));
+    square.vertices.push(new THREE.Vector3(x1, y2, .5));
+    square.vertices.push(new THREE.Vector3(x2, y1, .5));
+    square.vertices.push(new THREE.Vector3(x2, y2, .5));
 
     square.faces.push(new THREE.Face3(0, 1, 2));
     square.faces.push(new THREE.Face3(1, 2, 3));
