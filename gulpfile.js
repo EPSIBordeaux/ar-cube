@@ -3,7 +3,8 @@
 var gulp = require('gulp'), // Main Gulp module
     concat = require('gulp-concat'), // Gulp File concatenation plugin
     open = require('gulp-open'), // Gulp browser opening plugin
-    connect = require('gulp-connect'); // Gulp Web server runner plugin
+    connect = require('gulp-connect'), // Gulp Web server runner plugin
+    ghPages = require('gulp-gh-pages'); // Gulp Web server runner plugin
 
 // Configuration
 var configuration = {
@@ -12,15 +13,6 @@ var configuration = {
             html: './*.html',
             js: [
                 "./js/*.js"
-            ],
-            threex: [
-                "./threex/*.js"
-            ],
-            jsartoolkit5: [
-                "./jsartoolkit5/*.js"
-            ],
-            data: [
-                "./data/*"
             ]
         },
         dist: './dist'
@@ -44,25 +36,6 @@ gulp.task('js', function () {
         .pipe(gulp.dest(configuration.paths.dist + '/js'))
         .pipe(connect.reload());
 });
-
-gulp.task('artoolkit', function () {
-    gulp.src(configuration.paths.src.jsartoolkit5)
-        .pipe(gulp.dest(configuration.paths.dist + '/jsartoolkit5'))
-        .pipe(connect.reload());
-});
-
-gulp.task('threex', function () {
-    gulp.src(configuration.paths.src.threex)
-        .pipe(gulp.dest(configuration.paths.dist + '/threex'))
-        .pipe(connect.reload());
-});
-
-gulp.task('data', function () {
-    gulp.src(configuration.paths.src.data)
-        .pipe(gulp.dest(configuration.paths.dist + '/data'))
-        .pipe(connect.reload());
-});
-
 
 // Gulp task to create a web server
 gulp.task('connect', function () {
@@ -89,5 +62,14 @@ gulp.task('watch', function () {
     gulp.watch(configuration.paths.src.threex, ['threex']);
 });
 
+gulp.task("build", ['html', 'js']);
+
 // Gulp default task
-gulp.task('default', ['html', 'js', 'data', 'artoolkit', 'threex', 'connect', 'watch']);
+gulp.task('default', ['html', 'js', 'connect', 'watch']);
+
+gulp.task("deploy", ["build"], () => {
+    return gulp.src('dist/**/*', { dot: true })
+        .pipe(ghPages({
+            force: true
+        }));
+});

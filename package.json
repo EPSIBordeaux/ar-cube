@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "gulp"
+    "start": "gulp",
+    "deploy": "gulp deploy"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
     "gulp": "^3.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-connect": "^5.7.0",
+    "gulp-gh-pages": "^0.5.4",
     "gulp-open": "^3.0.1"
   }
 }
