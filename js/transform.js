@@ -8,8 +8,8 @@ function from(src) {
   var facesBatch = {
     batch: [],
     onchange: function(){},
-    add: function(face){
-      this.batch.push(face);
+    add: function(face, callback){
+      this.batch.push({face: face, callback:callback});
       this.onchange();
     }
   }
@@ -22,9 +22,8 @@ function from(src) {
 
     facesBatch.onchange = function() {
       for (let i = 0; i < this.batch.length; i++) {
-        const face = getSquarePoints(this.batch[i]);
-        console.log(face);
-        crop(img,face, 150, 150);
+        const face = getSquarePoints(this.batch[i].face);
+        this.batch[i].callback(crop(img,face, 150, 150));
        }
       this.faces = [];
     }
@@ -36,8 +35,8 @@ function from(src) {
   }
 
   return {
-    get: function(face) {
-      facesBatch.add(face);
+    get: function(face, callback) {
+      facesBatch.add(face, callback);
       return this;
     }
   }
@@ -85,7 +84,9 @@ function crop(img, anchors, width, height){
   canvasDist.height=height;
 
   // unwarp the source rectangle and draw it to the destination canvas
-	unwarp(img, anchors,unwarped,ctxDist);
+  unwarp(img, anchors,unwarped,ctxDist);
+  
+  return canvasDist.toDataURL();
 }
 
 // unwarp the source rectangle

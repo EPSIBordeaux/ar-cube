@@ -1,6 +1,6 @@
 var square_bas, square_droite, square_gauche, square_haut1, square_haut2;
 
-var renderer, camera, scene
+var renderer, camera, scene;
 
 var textureLoader = new THREE.TextureLoader();
 
@@ -10,11 +10,11 @@ AFRAME.registerComponent('registerevents', {
         var group = document.querySelector('a-box').object3D;
 
         // MATERIALS 
-        var material_color_orange = new THREE.MeshBasicMaterial({ color: 0xF6831E, side: THREE.DoubleSide });
-        var material_color_cyan = new THREE.MeshBasicMaterial({ color: 0x435354, side: THREE.DoubleSide });
-        var material_color_lightOrange = new THREE.MeshBasicMaterial({ color: 0xffce0c, side: THREE.DoubleSide });
-        var material_color_red = new THREE.MeshBasicMaterial({ color: 0xff400c, side: THREE.DoubleSide });
-        var material_color_violet = new THREE.MeshBasicMaterial({ color: 0xda0cff, side: THREE.DoubleSide });
+        var material_color_orange = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+        var material_color_cyan = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+        var material_color_lightOrange = new THREE.MeshBasicMaterial({side: THREE.DoubleSide });
+        var material_color_red = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+        var material_color_violet = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
 
         // MESH 
         square_bas = createAndPlaceSquare(material_color_orange, 0,-.5, 1);
@@ -36,8 +36,41 @@ AFRAME.registerComponent('registerevents', {
             var marker = this.object3D;
             var markerId = marker.id;
             console.log('markerFound', markerId);
-            loadTexture(square_bas, "HIRO.jpg");
-            loadTexture(square_haut1, "HIRO.jpg");
+
+
+            var camera = document.querySelector('a-entity').object3D.children[0];
+            var video = document.querySelector('video');
+
+            var canvas = document.createElement('canvas');
+            canvas.width = video.offsetWidth;
+            canvas.height = video.offsetHeight;
+
+            var ctx = canvas.getContext('2d');
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+             
+            var texture = from(canvas.toDataURL());
+
+            texture.get(getSquareCoordinates(camera, square_bas), function(url){
+                loadTexture(square_bas, url);
+            });
+            
+            texture.get(getSquareCoordinates(camera, square_droite), function(url){
+                loadTexture(square_droite, url);
+            });
+
+            texture.get(getSquareCoordinates(camera, square_gauche), function(url){
+                loadTexture(square_gauche, url);
+            });
+
+            texture.get(getSquareCoordinates(camera, square_haut1), function(url){
+                loadTexture(square_haut1, url);
+            });
+
+            texture.get(getSquareCoordinates(camera, square_haut2), function(url){
+                loadTexture(square_haut2, url);
+            });
+            
         });
 
         this.marker.addEventListener('markerLost', function () {
@@ -85,33 +118,22 @@ function createAndPlaceSquare(material, relativeX, relativeY, relativeZ) {
     return placeSquare(square_mesh, relativeX, relativeY, relativeZ);
 }
 
-function getSquareCoordinates(square) {
-    var topLeft = new THREE.Vector2(),
-        topRight = new THREE.Vector2(),
-        bottomLeft = new THREE.Vector2(),
-        bottomRight = new THREE.Vector2();
+function getSquareCoordinates(camera, square) {
 
-    var center = square.getWorldPosition();
-    var size = getSquareSize(square);
+    square.updateMatrixWorld();
 
-    console.log(size, center);
+    var points = [];
+    for (let i = 0; i < square.geometry.vertices.length; i++) {
+        var vector = square.geometry.vertices[i].clone();
+        var projectedPosition = vector.applyMatrix4(square.matrixWorld).project(camera);
 
-    topLeft.x = center.x - ((size.width).toFixed(1) / 2);
-    topLeft.y = center.y + ((size.heigth).toFixed(1) / 2);
-    topRight.x = center.x + ((size.width).toFixed(1) / 2);
-    topRight.y = center.y + ((size.heigth).toFixed(1) / 2);
-    bottomLeft.x = center.x - ((size.width).toFixed(1) / 2);
-    bottomLeft.y = center.y - ((size.heigth).toFixed(1) / 2);
-    bottomRight.x = center.x + ((size.width).toFixed(1) / 2);
-    bottomRight.y = center.y - ((size.heigth).toFixed(1) / 2);
-
-
-    return {
-        topLeft: topLeft,
-        topRight: topRight,
-        bottomLeft: bottomLeft,
-        bottomRight: bottomRight
+        projectedPosition.x = Math.round((vector.x + 1) / 2 * window.innerWidth);
+        projectedPosition.y = Math.round(-(vector.y - 1) / 2 * window.innerHeight);
+      
+        points.push(projectedPosition);
     }
+
+   return points;
 }
 
 function getSquareSize(square) {
